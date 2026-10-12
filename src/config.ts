@@ -23,5 +23,17 @@ export const DEMO_MODE =
 
 export const WORK_DAY_SECONDS = 8 * 3600;
 
-/** Pending browser-auth state older than this is rejected. */
+/** Pending browser-auth state older than this is rejected on callback (absolute safety net). */
 export const AUTH_STATE_TTL_MS = 15 * 60 * 1000;
+
+/**
+ * After the portal tab has heartbeated at least once, treat the tab as closed
+ * when no heartbeat arrives within this window.
+ */
+export const AUTH_HEARTBEAT_STALE_MS = 8 * 1000;
+
+/**
+ * Absolute max wait when the portal never heartbeats (older portals / blocked PNA).
+ * Not shown as a second-by-second countdown — tab monitoring is preferred.
+ */
+export const AUTH_WAIT_FALLBACK_MS = 5 * 60 * 1000;

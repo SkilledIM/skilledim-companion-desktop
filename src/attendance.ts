@@ -274,6 +274,15 @@ export function initAttendanceApp(): void {
     stopTimer();
     stopSync();
     const waiting = authStatus === 'waiting_for_browser';
+    const waitPhase = browserAuth.getWaitPhase();
+    const waitLabel =
+      waitPhase === 'connected'
+        ? 'Browser connected…'
+        : waiting
+          ? 'Waiting for browser…'
+          : 'Login on SkilledIM';
+    const infoClass =
+      waiting || authStatus === 'authenticated' ? 'auth-info' : 'auth-error';
 
     root.innerHTML = `
       <div class="auth-overlay">
@@ -287,16 +296,16 @@ export function initAttendanceApp(): void {
           <h2>${APP_NAME}</h2>
           <div class="auth-hero-icon" aria-hidden="true">👨‍💼</div>
 
-          ${authMessage ? `<div class="${waiting || authStatus === 'authenticated' ? 'auth-info' : 'auth-error'}">${authMessage}</div>` : ''}
+          ${authMessage ? `<div class="${infoClass}">${authMessage}</div>` : ''}
 
           <button type="button" class="auth-submit-btn" id="browser-login-btn" ${waiting ? 'disabled' : ''}>
-            ${waiting ? 'Waiting for browser…' : 'Login on SkilledIM'}
+            ${waitLabel}
           </button>
 
           ${
             waiting
               ? `<button type="button" class="auth-secondary-btn" id="cancel-login-btn">Cancel</button>
-                 <p class="auth-help-text">Finish sign-in in your browser. Companion will authorize when SkilledIM redirects back.</p>`
+                 <p class="auth-help-text">Companion monitors the SkilledIM tab. Closing that tab ends waiting. If you are already signed in, Companion is authorized automatically.</p>`
               : `<p class="auth-help-text">Securely sign in through<br/>SkilledIM in your browser.</p>`
           }
 

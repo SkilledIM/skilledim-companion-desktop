@@ -4,6 +4,8 @@
 
 SkilledIM Companion is a thin desktop client around the existing SkilledIM HRM HTTP API. Authentication happens in the **system browser**; the desktop shell only receives a JWT callback and talks to documented SkilledIM endpoints afterward.
 
+Browser-wait UX follows native-app practice (RFC 8252 loopback): Companion opens a short-lived `127.0.0.1` watch server; the portal tab heartbeats while open and signals close on `pagehide`. Waiting ends when the tab disconnects — not via a fake countdown. If the portal already has a SkilledIM session, it returns the JWT immediately.
+
 ```text
 SkilledIM Companion
         |
@@ -49,12 +51,14 @@ Because Authorization Code + PKCE is not offered by SkilledIM, Companion impleme
 Companion opens:
 
 ```text
-https://portal.skilledim.com/login
+https://portal.skilledim.com/
   ?client_id=skilledim-companion
   &redirect_uri=skilledim-companion://auth/callback
   &response_type=token
   &state=<csrf>
 ```
+
+(Use portal root `/`, not `/login`. Authenticated sessions treat `/login` as an unknown MainLayout path and show NotFound.)
 
 SkilledIM should redirect to:
 

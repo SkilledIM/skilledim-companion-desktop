@@ -5,7 +5,7 @@
 **Rule:** Do not create additional planning, tracking, API-mapping, architecture, or prompt documents. Update this file only.  
 **Related reference docs (not plans):** root `README.md`, `ARCHITECTURE.md`, `SECURITY.md`, `DEVELOPMENT.md`, `BUILD.md`, `RELEASE.md`.
 
-**Last updated:** 2026-10-12 (initialization / audit)
+**Last updated:** 2026-10-12 (portal companion auth handoff implemented; E2E pending)
 
 ---
 
@@ -74,7 +74,7 @@ Never mark `DONE` without verified acceptance evidence.
 |---------|-----------|--------|--------------|---------------------|---------------------|-------------|
 | SC-001 | Audit the existing desktop repository and confirm scope | DONE | — | Repo layout, stack, existing features vs R1 scope documented; exclusions confirmed; no duplicate plan docs created | 2026-10-12 audit: Tauri 2 + Vite + vanilla TS + Rust; modules `src/api.ts`, `auth.ts`, `attendance.ts`, `secureStore.ts`; keyring + deep-link present; **no** tray/autostart/reminders/profile photo; stack is vanilla TS (not React) | Maintain this plan as tasks complete |
 | SC-002 | Discover and map existing SkilledIM APIs | DONE | SC-001 | Auth, identity, status, check-in/out, history APIs recorded with method/path/auth/source; gaps listed as blockers/proposals | §3 API Mapping verified against backend controllers + Companion client + OpenAPI notes in `ARCHITECTURE.md` | Revisit only if backend contracts change |
-| SC-003 | Verify browser-based authentication feasibility and secure token handling | BLOCKED | SC-002 | End-to-end: portal → deep link → state/TTL → validate-token → keyring; no password UI; session restore/signout work | **Companion side largely implemented** (`auth.ts`, `secure_store.rs`). **Blocker:** portal codebase has **no** `skilledim-companion` / callback redirect handling (grep 2026-10-12). Full E2E cannot pass until portal implements handoff (outside this repo) | Coordinate portal redirect; then run E2E on Windows; update evidence |
+| SC-003 | Verify browser-based authentication feasibility and secure token handling | IN_PROGRESS | SC-002 | Browser handoff with tab liveness (loopback heartbeat), already-signed-in auto return, deep link + validate-token + keyring; Cancel; safety-net TTL (no fake countdown) | Loopback `auth_watch` (heartbeat/closed/callback) + portal `watch_uri` heartbeats/pagehide. Already-signed-in portal handoff. Opens `/` with companion params. **E2E** vs local portal | Restart `tauri:dev` + portal `:5174`; close tab to confirm wait ends; signed-in session auto-returns |
 | SC-004 | Integrate employee identity and organization branding | NOT_STARTED | SC-002, SC-003 (partial OK with restore) | Show real name/role; load & display profile image; show org name + logo; image cache only | Session maps name/company/`companyLogoUrl`; UI uses initials + generic SVG — **no** photo/logo fetch yet. APIs: ESS profile, employee/user profile-photo download, `OrganizationDto.logoUrl` | Implement photo + logo fetch/display after auth path usable |
 | SC-005 | Retrieve and refresh attendance status | IN_PROGRESS | SC-002, SC-003 | Status from ESS endpoint; reflects CHECK_IN/CHECK_OUT; periodic refresh; UI updates | `GET …/employee-self/{id}/attendance/status` + 60s sync in `attendance.ts`; needs E2E verification post-auth | Harden error/empty states; verify against live API |
 | SC-006 | Implement check-in/check-out | IN_PROGRESS | SC-005 | Today check-in/out via Attendance APIs; UI disabled when not today; server confirms | `POST …/check-in` and `…/check-out` wired; demo path local-only | E2E test; confirm medium/location behavior |
@@ -114,7 +114,7 @@ GET {PORTAL}/login?client_id=skilledim-companion&redirect_uri=skilledim-companio
 
 | Gap | Severity | Notes |
 |-----|----------|-------|
-| Portal companion redirect / authorize step | **BLOCKER for SC-003 E2E** | No `companion` / `skilledim-companion` handling found in `portal/src` (2026-10-12). Proposed change: portal-only (outside this repo). Do not modify Spring Boot for this. |
+| Portal companion redirect / authorize step | Implemented in portal (2026-10-12); E2E verification pending | `companionAuthHandoff.js` + `Layout.jsx`. Allowlisted client/redirect only. Deploy portal build before production Companion login works. |
 | OAuth 2.0 / PKCE | N/A | Not offered by OpenAPI; intentionally not invented |
 
 ### 3.2 Employee identity and branding
@@ -301,17 +301,27 @@ Assigned: SC-015. Validate tauri build, deep-link registration, RELEASE.md check
 | | |
 |--|--|
 | **Completed** | SC-001 (repo audit), SC-002 (API mapping into this document) |
-| **In progress** | SC-005, SC-006, SC-008 (client code present; E2E/auth-dependent verification pending) |
-| **Blocked** | **SC-003** — portal lacks Companion redirect/`token`+`state` handoff; Companion auth client and keyring are largely ready |
+| **In progress** | SC-003 (portal handoff coded; Windows E2E pending), SC-005, SC-006, SC-008 |
+| **Blocked** | None for auth handoff coding; production E2E waits on portal deploy + Companion deep-link test |
 | **Not started** | SC-004, SC-007, SC-009–SC-015 (SC-004/007 have clear API hooks) |
-| **Outstanding blockers** | (1) Portal companion authorize/redirect implementation (outside this repo). (2) Reminder eligibility leave semantics not yet confirmed in Companion. (3) No tray/autostart yet. |
-| **Recommended next task** | **Unblock SC-003** via portal handoff (coordinate outside Companion), then **SC-004** (profile image + org logo) in this repo. If portal work is delayed, proceed with **SC-007** (prefer `totalHours`) and **SC-011** (tray/autostart) in parallel on demo/restored-session paths where possible. |
+| **Outstanding blockers** | (1) SC-003 E2E not yet run against live portal+Companion. (2) Reminder eligibility leave semantics not yet confirmed in Companion. (3) No tray/autostart yet. |
+| **Recommended next task** | Verify SC-003 E2E (Companion → portal login → deep-link back), then **SC-004** (profile image + org logo). |
 
 ### Changed files (this initialization)
 
 - `docs/IMPLEMENTATION-PLAN.md` — created (this file)
 
+### Portal handoff (2026-10-12)
+
+- `portal/src/shared/utils/companionAuthHandoff.js` — created
+- `portal/src/shared/components/layout/Layout.jsx` — companion authorize UI + redirect after login / existing session
+- `docs/IMPLEMENTATION-PLAN.md` — SC-003 status updated
+
 ### Tests run (this initialization)
 
 - None (documentation-only initialization). Repository inspection and backend/portal greps only. Typecheck/build not executed.
+
+### Tests run (portal handoff)
+
+- Not run (code change only). Manual E2E: open Companion → Login on SkilledIM → sign in → confirm app receives callback.
 `)

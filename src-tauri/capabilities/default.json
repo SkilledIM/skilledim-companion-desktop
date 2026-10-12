@@ -12,7 +12,17 @@
       "identifier": "opener:allow-open-url",
       "allow": [
         { "url": "https://portal.skilledim.com/*" },
-        { "url": "https://api.skilledim.com/*" }
+        { "url": "https://api.skilledim.com/*" },
+        { "url": "http://localhost:*/*" },
+        { "url": "http://127.0.0.1:*/*" }
+      ]
+    },
+    {
+      "identifier": "http:default",
+      "allow": [
+        { "url": "https://api.skilledim.com/*" },
+        { "url": "http://localhost:*/*" },
+        { "url": "http://127.0.0.1:*/*" }
       ]
     }
   ]

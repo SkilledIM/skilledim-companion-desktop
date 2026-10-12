@@ -5,7 +5,7 @@ description = "SkilledIM Companion desktop application"
 authors = ["SkilledIM"]
 license = "MIT"
 edition = "2021"
-rust-version = "1.77"
+rust-version = "1.90"
 
 [lib]
 name = "app_lib"
@@ -23,6 +23,9 @@ tauri-plugin-log = "2"
 tauri-plugin-deep-link = "2"
 tauri-plugin-opener = "2"
 keyring = "3"
+tiny_http = "0.12"
+url = "2"
+tauri-plugin-http = { version = "2", features = ["rustls-tls"] }
 
 [target."cfg(any(target_os = \"macos\", windows, target_os = \"linux\"))".dependencies]
 tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }

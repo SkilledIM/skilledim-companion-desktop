@@ -1,3 +1,4 @@
+mod auth_watch;
 mod secure_store;
 
 use tauri::Emitter;
@@ -20,6 +21,8 @@ pub fn run() {
   builder
     .plugin(tauri_plugin_opener::init())
     .plugin(tauri_plugin_deep_link::init())
+    .plugin(tauri_plugin_http::init())
+    .manage(auth_watch::AuthWatchState::default())
     .invoke_handler(tauri::generate_handler![
       secure_store::secure_store_token,
       secure_store::secure_load_token,
@@ -31,6 +34,9 @@ pub fn run() {
       secure_store::secure_load_profile,
       secure_store::secure_clear_profile,
       secure_store::secure_clear_all,
+      auth_watch::auth_watch_start,
+      auth_watch::auth_watch_stop,
+      auth_watch::auth_watch_status,
     ])
     .setup(|app| {
       if cfg!(debug_assertions) {

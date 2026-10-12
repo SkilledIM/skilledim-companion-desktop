@@ -7,6 +7,7 @@
  */
 
 import { API_BASE_URL } from './config';
+import { companionFetch } from './http';
 import { isJwtExpired } from './jwt';
 import { clearAllSecure, loadToken, storeToken } from './secureStore';
 
@@ -102,7 +103,7 @@ class SkilledImApi {
    */
   async validateToken(token: string): Promise<UserSession> {
     const url = `${API_BASE_URL}/api/auth/validate-token?token=${encodeURIComponent(token)}`;
-    const response = await fetch(url, {
+    const response = await companionFetch(url, {
       method: 'POST',
       headers: { Accept: 'application/json' },
     });
@@ -134,7 +135,7 @@ class SkilledImApi {
   ): Promise<UserSession> {
     this.setMemoryToken(token);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/session`, {
+      const response = await companionFetch(`${API_BASE_URL}/api/auth/session`, {
         method: 'GET',
         headers: this.getHeaders(),
       });
@@ -184,7 +185,7 @@ class SkilledImApi {
   async signOut(): Promise<void> {
     try {
       if (memoryToken) {
-        await fetch(`${API_BASE_URL}/api/auth/signout`, {
+        await companionFetch(`${API_BASE_URL}/api/auth/signout`, {
           method: 'POST',
           headers: this.getHeaders(),
         });
@@ -211,7 +212,7 @@ class SkilledImApi {
     employeeId: number
   ): Promise<AttendanceStatus> {
     const url = `${API_BASE_URL}/api/organizations/${organizationId}/employee-self/${employeeId}/attendance/status`;
-    const response = await fetch(url, { method: 'GET', headers: this.getHeaders() });
+    const response = await companionFetch(url, { method: 'GET', headers: this.getHeaders() });
     if (!response.ok) {
       throw new Error(await this.parseError(response, 'Failed to load attendance status'));
     }
@@ -234,7 +235,7 @@ class SkilledImApi {
   ): Promise<AttendanceStatus> {
     const today = new Date().toISOString().split('T')[0];
     const url = `${API_BASE_URL}/api/organizations/${organizationId}/attendance/employee/${employeeId}/check-in`;
-    const response = await fetch(url, {
+    const response = await companionFetch(url, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify({ date: today, medium: 'WEBSITE', location: null }),
@@ -251,7 +252,7 @@ class SkilledImApi {
     attendanceId: number
   ): Promise<AttendanceStatus> {
     const url = `${API_BASE_URL}/api/organizations/${organizationId}/attendance/employee/${employeeId}/attendance/${attendanceId}/check-out`;
-    const response = await fetch(url, {
+    const response = await companionFetch(url, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify({ medium: 'WEBSITE', location: null }),
@@ -271,7 +272,7 @@ class SkilledImApi {
     const url =
       `${API_BASE_URL}/api/organizations/${organizationId}/attendance/employee/${employeeId}` +
       `/date-range?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&size=100`;
-    const response = await fetch(url, { method: 'GET', headers: this.getHeaders() });
+    const response = await companionFetch(url, { method: 'GET', headers: this.getHeaders() });
     if (!response.ok) return [];
     const resJson = await response.json();
     const data = resJson.data;
