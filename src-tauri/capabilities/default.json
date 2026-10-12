@@ -1,0 +1,19 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Default capabilities for SkilledIM Companion",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:event:default",
+    "deep-link:default",
+    "opener:default",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        { "url": "https://portal.skilledim.com/*" },
+        { "url": "https://api.skilledim.com/*" }
+      ]
+    }
+  ]
+}
